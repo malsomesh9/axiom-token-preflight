@@ -86,7 +86,7 @@ I noticed Axiom is moving fast in Solana memecoin trading, where users often tra
 
 It is intentionally scoped, but it shows the way I work: study the product, notice a real user-risk problem, build a working version, handle messy data limitations, and explain the production path clearly.
 
-Demo: [add link]  
-Repo: [add link]
+Demo: https://temporary-snappy-sulfur-bip3ohp.vercel.app/?scan=1
+Repo: https://github.com/malsomesh9/axiom-token-preflight
 
 I would love to work on problems like this with Axiom.
