@@ -1,3 +1,4 @@
 node_modules/
 data/scans.json
 .DS_Store
+.vercel
