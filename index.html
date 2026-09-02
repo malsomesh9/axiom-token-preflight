@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Axiom Token Preflight</title>
+    <meta
+      name="description"
+      content="A full Solana token pre-trade risk scanner prototype for Axiom."
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <aside class="sidebar" aria-label="Project brief">
+        <div>
+          <p class="eyebrow">YC W25 hiring build</p>
+          <h1>Axiom Token Preflight</h1>
+          <p class="lede">
+            A backend-backed pre-trade risk desk for Solana memecoin flow:
+            authority checks, market liquidity, holder concentration, and a
+            persisted scan trail in one trader-readable view.
+          </p>
+        </div>
+
+        <section class="brief-card" aria-label="Why Axiom">
+          <span>Target</span>
+          <strong>Axiom</strong>
+          <p>Solana memecoins, perps, yield, and high-speed retail trading.</p>
+        </section>
+
+        <section class="brief-card" aria-label="Problem noticed">
+          <span>Problem noticed</span>
+          <strong>Fast execution compresses diligence.</strong>
+          <p>
+            Traders often see price action before they see mint controls,
+            concentration, liquidity, or volatility risk.
+          </p>
+        </section>
+
+        <section class="stack-strip" aria-label="Prototype stack">
+          <span>Node backend</span>
+          <span>Solana RPC</span>
+          <span>DexScreener</span>
+          <span>JSON persistence</span>
+        </section>
+      </aside>
+
+      <section class="desk" aria-label="Risk desk">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">Live prototype</p>
+            <h2>Token Risk Desk</h2>
+          </div>
+          <div id="status" class="status" role="status">Ready.</div>
+        </header>
+
+        <form id="scan-form" class="scan-form">
+          <div class="trade-inputs">
+            <div>
+              <label for="mint">Solana token mint</label>
+              <input
+                id="mint"
+                name="mint"
+                autocomplete="off"
+                spellcheck="false"
+                value="DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263"
+              />
+            </div>
+            <div>
+              <label for="trade-size">Trade size</label>
+              <input id="trade-size" name="trade-size" type="number" min="50" max="1000000" step="50" value="2500" />
+            </div>
+            <button type="submit">Run preflight</button>
+          </div>
+          <div id="samples" class="samples" aria-label="Sample token mints"></div>
+        </form>
+
+        <section class="verdict-grid" aria-label="Verdict">
+          <article class="score-card">
+            <span>Risk score</span>
+            <div class="score-line">
+              <strong id="score">--</strong>
+              <b id="risk-label" class="pill neutral">Waiting</b>
+            </div>
+            <p id="recommended-action">Run a scan to generate an action.</p>
+          </article>
+          <article class="token-card">
+            <span>Token</span>
+            <strong id="token-name">No token scanned</strong>
+            <p id="token-meta">Mint, market, and authority data will appear here.</p>
+          </article>
+        </section>
+
+        <section class="execution-panel" aria-label="Execution guardrail">
+          <article>
+            <span>Execution decision</span>
+            <strong id="execution-decision">--</strong>
+            <p id="execution-reason">Enter a trade size to estimate whether the current pool depth can handle it.</p>
+          </article>
+          <article>
+            <span>Estimated impact</span>
+            <strong id="price-impact">--</strong>
+            <p id="impact-cost">Includes a simple pool-depth impact estimate.</p>
+          </article>
+          <article>
+            <span>Clean size</span>
+            <strong id="clean-size">--</strong>
+            <p>Approximate 1% depth band on the best visible pair.</p>
+          </article>
+          <article>
+            <span>Review size</span>
+            <strong id="review-size">--</strong>
+            <p>Above this band the trade should be blocked or split.</p>
+          </article>
+        </section>
+
+        <section class="metrics" aria-label="Primary metrics">
+          <article>
+            <span>Price</span>
+            <strong id="price">--</strong>
+          </article>
+          <article>
+            <span>Liquidity</span>
+            <strong id="liquidity">--</strong>
+          </article>
+          <article>
+            <span>24h volume</span>
+            <strong id="volume">--</strong>
+          </article>
+          <article>
+            <span>24h change</span>
+            <strong id="change">--</strong>
+          </article>
+          <article>
+            <span>Mint authority</span>
+            <strong id="mint-authority">--</strong>
+          </article>
+          <article>
+            <span>Freeze authority</span>
+            <strong id="freeze-authority">--</strong>
+          </article>
+        </section>
+
+        <section class="split">
+          <article class="panel">
+            <div class="section-head">
+              <h3>Preflight Findings</h3>
+              <span id="scan-time">No scan yet</span>
+            </div>
+            <ul id="findings-list" class="findings-list"></ul>
+          </article>
+
+          <article class="panel">
+            <div class="section-head">
+              <h3>Holder Concentration</h3>
+              <span id="holder-status">Waiting</span>
+            </div>
+            <div class="holder-summary">
+              <div>
+                <span>Top holder</span>
+                <strong id="top-holder">--</strong>
+              </div>
+              <div>
+                <span>Top 10</span>
+                <strong id="top-ten">--</strong>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Rank</th>
+                    <th>Account</th>
+                    <th>Supply</th>
+                  </tr>
+                </thead>
+                <tbody id="holders-body"></tbody>
+              </table>
+            </div>
+          </article>
+        </section>
+
+        <section class="split bottom">
+          <article class="panel">
+            <div class="section-head">
+              <h3>DEX Markets</h3>
+              <span id="pair-count">0 pairs</span>
+            </div>
+            <div id="pairs-list" class="pairs-list"></div>
+          </article>
+
+          <article class="panel">
+            <div class="section-head">
+              <h3>Recent Scans</h3>
+              <span>Backend saved</span>
+            </div>
+            <div id="history-list" class="history-list"></div>
+          </article>
+        </section>
+      </section>
+    </main>
+
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>
