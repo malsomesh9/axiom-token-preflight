@@ -62,6 +62,32 @@ const api = async (path) => {
   return payload;
 };
 
+const readLocalHistory = () => {
+  try {
+    return JSON.parse(localStorage.getItem("axiom-preflight-history") ?? "[]");
+  } catch {
+    return [];
+  }
+};
+
+const saveLocalHistory = (scan) => {
+  const entry = {
+    id: scan.id,
+    scannedAt: scan.scannedAt,
+    mint: scan.mint,
+    name: scan.name,
+    symbol: scan.symbol,
+    score: scan.verdict.score,
+    level: scan.verdict.level,
+    tradeUsd: scan.execution.tradeUsd,
+    decision: scan.execution.decision,
+    priceUsd: scan.market.bestPair?.priceUsd ?? null,
+    liquidityUsd: scan.market.totals?.liquidityUsd ?? null,
+  };
+  const next = [entry, ...readLocalHistory().filter((item) => item.mint !== entry.mint)].slice(0, 20);
+  localStorage.setItem("axiom-preflight-history", JSON.stringify(next));
+};
+
 const setLoading = (isLoading) => {
   form.querySelector("button[type='submit']").disabled = isLoading;
   document.body.classList.toggle("is-loading", isLoading);
@@ -175,7 +201,10 @@ const renderPairs = (market) => {
 };
 
 const renderHistory = async () => {
-  const { scans } = await api("/api/history");
+  const { scans: backendScans } = await api("/api/history");
+  const scans = [...readLocalHistory(), ...backendScans].filter(
+    (scan, index, all) => all.findIndex((item) => item.mint === scan.mint) === index,
+  );
   historyList.replaceChildren();
 
   if (!scans.length) {
@@ -235,6 +264,7 @@ const runScan = async (mint, tradeUsd) => {
 
   try {
     const scan = await api(`/api/scan?mint=${encodeURIComponent(mint)}&tradeUsd=${encodeURIComponent(tradeUsd)}`);
+    saveLocalHistory(scan);
     renderScan(scan);
     await renderHistory();
     setStatus("Preflight complete.", "good");
